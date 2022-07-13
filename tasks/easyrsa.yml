@@ -1,0 +1,65 @@
+---
+# Tasks for EasyRSA
+
+- name: Install EasyRSA
+  apt:
+    pkg: easy-rsa
+
+- name: Create symlink
+  file:
+    src: /usr/share/easy-rsa/easyrsa
+    dest: /usr/bin/easyrsa
+    state: link
+
+- name: Create vars file
+  template:
+    src: vars.j2
+    dest: /usr/share/easy-rsa/vars
+
+- name: Init PKI
+  command: easyrsa init-pki
+
+- name: Build CA
+  command: easyrsa build-ca nopass
+
+- name: Create server cert and key
+  command: easyrsa build-server-full {{ server_name }} nopass
+
+- name: Create DH key
+  command: easyrsa gen-dh
+
+- name: Generate HMAC
+  command: openvpn --genkey secret {{ pki_dir }}/ta.key
+
+- name: Create client cert and key
+  command: easyrsa build-client-full {{ client_name }} nopass
+
+- name: Create configs dir for clients
+  file:
+    path: "{{ configs_dir }}"
+    state: directory
+    mode: 700
+
+- name: Set dir structure
+  file:
+    path: "{{ configs_dir }}/{{ item }}"
+    state: directory
+  with_items:
+    - keys
+    - files
+
+- name: Move files
+  copy:
+    remote_src: yes
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "{{ pki_dir }}/issued/{{ server_name }}.crt", dest: /etc/openvpn/ }
+    - { src: "{{ pki_dir }}/private/{{ server_name }}.key", dest: /etc/openvpn/ }
+    - { src: "{{ pki_dir }}/ca.crt", dest: /etc/openvpn }
+    - { src: "{{ pki_dir }}/ta.key", dest: /etc/openvpn }
+    - { src: "{{ pki_dir }}/dh.pem", dest: /etc/openvpn }
+    - { src: "{{ pki_dir }}/private/{{ client_name }}.key", dest: "{{ configs_dir }}/keys" }
+    - { src: "{{ pki_dir }}/issued/{{ client_name }}.crt", dest: "{{ configs_dir }}/keys" }
+    - { src: "{{ pki_dir }}/ta.key", dest: "{{ configs_dir }}/keys"}
+    - { src: "{{ pki_dir }}/ca.crt", dest: "{{ configs_dir }}/keys"}

@@ -1,0 +1,39 @@
+# Configure NAT rules
+
+- name: Enable IP forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+
+- name: Get default interface
+  shell: "ip route | head -1 | awk '{print $5}'"
+  register: interface
+
+- name: Get IP address
+  shell: "curl ifconfig.me"
+  register: remote_addr
+
+- name: Install iptables
+  apt:
+    pkg: iptables
+
+- name: Set OpenVPN NAT
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    source: 10.8.0.0/24
+    out_interface: "{{ interface.stdout }}"
+    jump: MASQUERADE
+
+- name: Set default forward policy to accept
+  iptables:
+    chain: FORWARD
+    policy: ACCEPT
+
+- name: Allow OpenVPN traffic
+  iptables:
+    chain: INPUT
+    protocol: "{{ protocol }}"
+    destination_port: "{{ listen_port }}"
+    jump: ACCEPT

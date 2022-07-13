@@ -1,0 +1,31 @@
+---
+# Default values for OpenVPN role
+
+# EasyRSA PKI directory
+pki_dir:      /root/pki
+
+# vars file options
+var_cn:       srv
+var_country:  RU
+var_province: ''
+var_city:     Moscow
+var_org:      ''
+var_email:    ''
+var_ou:       ''
+
+# Server CN
+server_name: vpnsrv
+
+# Client name
+client_name: cli1
+
+# Client configs dir
+configs_dir: /etc/openvpn/cli-confs
+
+# OpenVPN default options
+# =================================
+
+listen_addr: 0.0.0.0
+listen_port: 1194
+protocol: udp
+max_clients: 5

@@ -1,0 +1,37 @@
+---
+# Tasks for OpenVPN
+
+- name: Install OpenVPN
+  apt:
+    pkg: openvpn
+
+- name: Set up CA, create certs & keys
+  include_tasks: easyrsa.yml
+
+- name: Configure OpenVPN
+  template:
+    src: server.conf.j2
+    dest: /etc/openvpn/server.conf
+
+- name: Configure network
+  include_tasks: network.yml
+
+- name: Start OpenVPN service
+  systemd:
+    name: openvpn@server.service
+    state: started
+    enabled: yes
+
+- name: Create base.conf
+  template:
+    src: base.conf.j2
+    dest: "{{ configs_dir }}/base.conf"
+
+- name: Create makeconf.sh
+  template:
+    src: makeconf.sh.j2
+    dest: "{{ configs_dir }}/makeconf.sh"
+    mode: 700
+
+- name: Run script
+  command: bash "{{ configs_dir }}/makeconf.sh" "{{ client_name }}"  

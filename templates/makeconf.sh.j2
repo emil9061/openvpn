@@ -1,0 +1,22 @@
+#!/bin/bash
+
+keydir={{ configs_dir }}/keys
+filesdir={{ configs_dir }}/files
+baseconf={{ configs_dir }}/base.conf
+
+if [ -z $1 ]
+then
+  echo "Enter client name"
+else
+  cat ${baseconf} \
+    <(echo -e '<ca>') \
+    ${keydir}/ca.crt \
+    <(echo -e '</ca>\n<cert>') \
+    ${keydir}/${1}.crt \
+    <(echo -e '</cert>\n<key>') \
+    ${keydir}/${1}.key \
+    <(echo -e '</key>\n<tls-auth>') \
+    ${keydir}/ta.key \
+    <(echo -e '</tls-auth>') \
+    > ${filesdir}/${1}.ovpn
+fi
