@@ -1,5 +1,11 @@
 # Configure NAT rules
 
+- name: Install utils
+  apt:
+    pkg:
+      - iptables
+      - curl
+
 - name: Enable IP forwarding
   sysctl:
     name: net.ipv4.ip_forward
@@ -13,10 +19,6 @@
 - name: Get IP address
   shell: "curl ifconfig.me"
   register: remote_addr
-
-- name: Install iptables
-  apt:
-    pkg: iptables
 
 - name: Set OpenVPN NAT
   iptables:

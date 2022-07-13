@@ -3,8 +3,10 @@
 
 - name: Install EasyRSA
   apt:
-    pkg: easy-rsa
-
+    pkg:
+      - easy-rsa
+      - openssl
+      
 - name: Create symlink
   file:
     src: /usr/share/easy-rsa/easyrsa

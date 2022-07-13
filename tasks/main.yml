@@ -34,4 +34,9 @@
     mode: 700
 
 - name: Run script
-  command: bash "{{ configs_dir }}/makeconf.sh" "{{ client_name }}"  
+  command: bash "{{ configs_dir }}/makeconf.sh" "{{ client_name }}"
+
+- name: Get ovpn config
+  fetch:
+    src: "{{ configs_dir }}/files/{{ client_name }}.ovpn"
+    dest: "/tmp/{{ client_name }}.ovpn"
